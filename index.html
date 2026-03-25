@@ -598,7 +598,7 @@ async function openQR(){
     document.getElementById('qr-url-text').textContent='';
     document.getElementById('qr-status').innerHTML=
       '<div style="color:#dc2626;margin-bottom:10px">⚠️ 無法上傳至雲端（網絡限制）</div>'
-      +'<button onclick="downloadCVLocally();closeModal('qr-modal')" style="background:#80BC00;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-weight:700;cursor:pointer;font-size:.85rem;width:100%">⬇️ 儲存至本機後手動分享</button>';
+      +'<button onclick="downloadCVLocally();closeModal(\'qr-modal\')" style="background:#80BC00;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-weight:700;cursor:pointer;font-size:.85rem;width:100%">⬇️ 儲存至本機後手動分享</button>';
     document.getElementById('qr-status').className='modal-status';
     return;
   }
@@ -622,7 +622,7 @@ async function sendEmail(){
   st.innerHTML='<span class="spinner-sm"></span>上傳中…';st.className='modal-status';
   var url=await uploadCV();
   if(!url){
-    st.innerHTML='<div style="color:#dc2626;margin-bottom:8px">⚠️ 無法上傳至雲端</div><button onclick="downloadCVLocally();closeModal('email-modal')" style="background:#80BC00;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-weight:700;cursor:pointer;font-size:.82rem">⬇️ 儲存至本機後手動傳送</button>';
+    st.innerHTML='<div style="color:#dc2626;margin-bottom:8px">⚠️ 無法上傳至雲端</div><button onclick="downloadCVLocally();closeModal(\'email-modal\')" style="background:#80BC00;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-weight:700;cursor:pointer;font-size:.82rem">⬇️ 儲存至本機後手動傳送</button>';
     st.className='modal-status';return;}
   var name=g('f-name')||'我';
   var subject=encodeURIComponent(name+' 的 CV — 香港建造學院');
