@@ -116,6 +116,16 @@ textarea{resize:vertical;min-height:72px;}
 .dl-btn-sub{font-size:0.68rem;color:var(--grey-l);font-weight:400;margin-top:1px;display:block;}
 .btn-reedit{width:100%;border:1.5px solid var(--border);background:transparent;color:var(--grey);border-radius:8px;padding:9px;font-size:0.78rem;font-weight:600;cursor:pointer;margin-top:auto;}
 .btn-reedit:hover{background:#f4f4f4;}
+.btn-reset-result{width:100%;border:1.5px solid #fca5a5;background:#fff5f5;color:#dc2626;border-radius:8px;padding:9px;font-size:0.78rem;font-weight:600;cursor:pointer;margin-top:8px;}
+.btn-reset-result:hover{background:#fee2e2;}
+.btn-reset-form{background:transparent;border:1.5px solid #fca5a5;color:#dc2626;padding:11px 28px;border-radius:10px;font-size:0.85rem;font-weight:600;cursor:pointer;margin-left:12px;transition:all .2s;}
+.btn-reset-form:hover{background:#fee2e2;}
+.confirm-warn{background:#fff8e1;border:1px solid #ffe082;border-radius:8px;padding:12px 14px;font-size:0.81rem;color:#7b5800;margin-bottom:16px;line-height:1.65;}
+.modal .btn-cancel{width:100%;border:1.5px solid var(--border);background:transparent;color:var(--grey);border-radius:8px;padding:10px;font-size:0.82rem;font-weight:600;cursor:pointer;margin-top:8px;}
+.modal .btn-cancel:hover{background:#f4f4f4;}
+#qr-return-btn{display:none;width:100%;background:var(--green);color:#fff;border:none;border-radius:8px;padding:11px;font-weight:700;font-size:0.85rem;cursor:pointer;margin-top:14px;}
+#qr-return-btn:hover{background:var(--green-d);}
+#qr-countdown{font-size:0.72rem;color:var(--grey-l);text-align:center;margin-top:8px;min-height:16px;}
 
 /* ── MODALS ── */
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;align-items:center;justify-content:center;}
@@ -277,6 +287,7 @@ textarea{resize:vertical;min-height:72px;}
 
       <div class="form-bottom">
         <button class="btn-generate" onclick="startGenerate()">✨ 生成我的 CV</button>
+        <button class="btn-reset-form" onclick="confirmFormReset()">🔄 重置</button>
       </div>
     </div>
   </div>
@@ -316,7 +327,7 @@ textarea{resize:vertical;min-height:72px;}
     <div class="sidebar-divider"></div>
     <div class="sidebar-block">
       <div class="sidebar-label">下載 / 分享</div>
-      <button class="dl-btn" onclick="openQR()">
+      <button class="dl-btn" onclick="confirmQR()">
         <span class="ic">📱</span>
         <span><span style="display:block;font-weight:700">QR Code 下載</span><span class="dl-btn-sub">掃描即可喺手機下載</span></span>
       </button>
@@ -326,6 +337,7 @@ textarea{resize:vertical;min-height:72px;}
       </button>
     </div>
     <button class="btn-reedit" onclick="goEdit()">← 返回編輯</button>
+    <button class="btn-reset-result" onclick="confirmReset()">🔄 重置，填寫新 CV</button>
   </div>
 </div>
 
@@ -338,12 +350,26 @@ textarea{resize:vertical;min-height:72px;}
     <div id="qr-box"></div>
     <div class="qr-url" id="qr-url-text"></div>
     <div class="modal-status" id="qr-status"></div>
+    <button id="qr-return-btn" onclick="returnAndReset()">✅ 完成，填寫新 CV</button>
+    <div id="qr-countdown"></div>
+  </div>
+</div>
+
+<!-- ══ MODAL: CONFIRM QR ══ -->
+<div class="modal-bg" id="confirm-qr-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('confirm-qr-modal')">✕</button>
+    <h3>⚠️ 確認下載 CV</h3>
+    <div class="confirm-warn">確認後將<strong>無法再修改</strong>樣式或內容。<br>請確保你已完成所有編輯，再繼續。</div>
+    <button class="btn-solid" onclick="proceedQR()">✅ 確認，生成 QR Code</button>
+    <button class="btn-cancel" onclick="closeModal('confirm-qr-modal')">取消</button>
   </div>
 </div>
 
 
 <script>
 var skills=[], items={edu:[],exp:[],ach:[]}, currentTheme='t-clean', sharedUrl=null;
+var redirectTimer=null;
 
 // ── HEADER BUTTONS ──
 function setHdr(page){
@@ -608,14 +634,88 @@ async function openQR(){
       '<div style="color:#dc2626;margin-bottom:10px">⚠️ 無法上傳至雲端（網絡限制）</div>'
       +'<button onclick="downloadCVLocally();closeModal(\'qr-modal\')" style="background:#80BC00;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-weight:700;cursor:pointer;font-size:.85rem;width:100%">⬇️ 儲存至本機後手動分享</button>';
     document.getElementById('qr-status').className='modal-status';
+    startRedirectCountdown();
     return;
   }
   box.innerHTML='<div id="qr-canvas"></div>';
   new QRCode(document.getElementById('qr-canvas'),{text:url,width:190,height:190,colorDark:'#1a1a1a',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
   document.getElementById('qr-url-text').textContent=url;
   document.getElementById('qr-status').innerHTML='<span style="color:#80BC00">✅ 連結有效期 24 小時</span>';
+  startRedirectCountdown();
 }
 
+
+// ── CONFIRM QR & LOCK ──
+function confirmQR(){
+  document.getElementById('confirm-qr-modal').classList.add('open');
+}
+function proceedQR(){
+  closeModal('confirm-qr-modal');
+  lockEditing();
+  openQR();
+}
+function lockEditing(){
+  var reedit=document.querySelector('.btn-reedit');
+  if(reedit)reedit.style.display='none';
+  document.getElementById('hdr-right').innerHTML='';
+  document.querySelectorAll('.theme-pick').forEach(function(b){
+    b.disabled=true;b.style.opacity='.4';b.style.pointerEvents='none';
+  });
+}
+
+// ── REDIRECT COUNTDOWN ──
+function startRedirectCountdown(){
+  var secs=60;
+  var cd=document.getElementById('qr-countdown');
+  var rb=document.getElementById('qr-return-btn');
+  if(rb)rb.style.display='block';
+  if(cd)cd.textContent=secs+' 秒後自動重置...';
+  if(redirectTimer)clearInterval(redirectTimer);
+  redirectTimer=setInterval(function(){
+    secs--;
+    if(cd)cd.textContent=secs+' 秒後自動重置...';
+    if(secs<=0){clearInterval(redirectTimer);redirectTimer=null;returnAndReset();}
+  },1000);
+}
+function returnAndReset(){
+  if(redirectTimer){clearInterval(redirectTimer);redirectTimer=null;}
+  closeModal('qr-modal');
+  resetAll();
+  showPage('page-form');
+}
+
+// ── RESET ALL ──
+function resetAll(){
+  ['f-name','f-title','f-email','f-phone','f-location','f-website','f-summary'].forEach(function(id){
+    var el=document.getElementById(id);if(el)el.value='';
+  });
+  skills=[];items={edu:[],exp:[],ach:[]};
+  document.getElementById('skill-tags').innerHTML='';
+  renderList('edu');renderList('exp');renderList('ach');
+  sharedUrl=null;currentTheme='t-clean';
+  document.querySelectorAll('.theme-pick').forEach(function(b){
+    b.disabled=false;b.style.opacity='';b.style.pointerEvents='';b.classList.remove('active');
+  });
+  var first=document.querySelector('.theme-pick');
+  if(first)first.classList.add('active');
+  var reedit=document.querySelector('.btn-reedit');
+  if(reedit)reedit.style.display='';
+  var rb=document.getElementById('qr-return-btn');
+  if(rb)rb.style.display='none';
+  var cd=document.getElementById('qr-countdown');
+  if(cd)cd.textContent='';
+}
+function confirmReset(){
+  if(!confirm('確定重置？所有已填寫嘅資料將被清除。'))return;
+  if(redirectTimer){clearInterval(redirectTimer);redirectTimer=null;}
+  closeModal('qr-modal');
+  resetAll();
+  showPage('page-form');
+}
+function confirmFormReset(){
+  if(!confirm('確定清除所有已填寫嘅內容？'))return;
+  resetAll();
+}
 
 function closeModal(id){document.getElementById(id).classList.remove('open');}
 document.querySelectorAll('.modal-bg').forEach(function(m){m.addEventListener('click',function(e){if(e.target===m)m.classList.remove('open');});});
