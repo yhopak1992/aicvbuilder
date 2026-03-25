@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CV Builder — HKIC</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 :root{
@@ -154,23 +156,21 @@ textarea{resize:vertical;min-height:72px;}
 .t-clean .cv-skill{border:1.5px solid #80BC00;padding:3px 11px;font-size:.75rem;color:#3a5a00;background:#f0f8d8;font-family:"Segoe UI",sans-serif;}
 
 /* --- Theme 2: Modern HKIC --- */
-#cv-out.t-modern{background:#fff;font-family:"Segoe UI",system-ui,sans-serif;width:100%;max-width:740px;box-shadow:0 4px 24px rgba(0,0,0,.13);border-radius:8px;overflow:hidden;display:grid;grid-template-columns:210px 1fr;}
-.t-modern .cv-sidebar{background:#1a1a1a;color:#fff;padding:34px 18px 26px;display:flex;flex-direction:column;border-right:3px solid #80BC00;}
+#cv-out.t-modern{background:#fff;font-family:"Segoe UI",system-ui,sans-serif;width:100%;max-width:740px;min-height:1050px;box-shadow:0 4px 24px rgba(0,0,0,.13);border-radius:8px;display:grid;grid-template-columns:200px 1fr;align-items:stretch;}
+.t-modern .cv-sidebar{background:#1a1a1a;color:#fff;padding:34px 16px 26px;display:flex;flex-direction:column;border-right:3px solid #80BC00;border-radius:8px 0 0 8px;word-break:break-word;overflow-wrap:break-word;}
 .t-modern .cv-avatar{width:66px;height:66px;border-radius:50%;background:rgba(128,188,0,.18);border:3px solid #80BC00;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:700;color:#80BC00;}
-.t-modern .cv-name{font-size:1.1rem;font-weight:700;text-align:center;line-height:1.3;margin-bottom:3px;}
-.t-modern .cv-role{font-size:.72rem;text-align:center;color:#80BC00;font-weight:600;margin-bottom:18px;}
+.t-modern .cv-name{font-size:1.05rem;font-weight:700;text-align:center;line-height:1.35;margin-bottom:3px;word-break:break-word;}
+.t-modern .cv-role{font-size:.7rem;text-align:center;color:#80BC00;font-weight:600;margin-bottom:18px;word-break:break-word;}
 .t-modern .sb-sec{margin-top:16px;}
 .t-modern .sb-title{font-size:.62rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#80BC00;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid rgba(128,188,0,.25);}
-.t-modern .sb-row{display:flex;align-items:flex-start;gap:6px;font-size:.72rem;color:#ccc;margin-bottom:5px;line-height:1.4;}
+.t-modern .sb-row{display:flex;align-items:flex-start;gap:6px;font-size:.7rem;color:#ccc;margin-bottom:5px;line-height:1.5;}
+.t-modern .sb-row span:last-child{flex:1;min-width:0;word-break:break-word;overflow-wrap:break-word;}
 .t-modern .sb-ic{color:#80BC00;flex-shrink:0;width:13px;}
-.t-modern .sk-entry{margin-bottom:7px;}
-.t-modern .sk-name{font-size:.71rem;color:#ccc;margin-bottom:3px;}
-.t-modern .sk-dots{display:flex;gap:3px;}
-.t-modern .sk-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.15);}
-.t-modern .sk-dot.on{background:#80BC00;}
+.t-modern .sk-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:2px;}
+.t-modern .sk-tag{background:rgba(128,188,0,.15);color:#b8de60;border:1px solid rgba(128,188,0,.3);border-radius:10px;padding:2px 8px;font-size:.67rem;word-break:break-word;}
 .t-modern .sb-logo{margin-top:auto;padding-top:18px;border-top:1px solid rgba(128,188,0,.22);display:flex;justify-content:center;}
 .t-modern .sb-logo img{height:28px;}
-.t-modern .cv-main{padding:30px 26px;background:#fff;}
+.t-modern .cv-main{padding:30px 26px;background:#fff;border-radius:0 8px 8px 0;}
 .t-modern .cv-sec{font-size:.69rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#80BC00;margin:18px 0 10px;display:flex;align-items:center;gap:7px;}
 .t-modern .cv-sec::after{content:"";flex:1;height:1.5px;background:linear-gradient(to right,#b8de60,transparent);}
 .t-modern .cv-sec:first-child{margin-top:0;}
@@ -213,6 +213,7 @@ textarea{resize:vertical;min-height:72px;}
 .t-pro .cv-edu-yr{font-size:.7rem;color:#80BC00;font-weight:600;}
 
 @media print{
+  @page{size:A4 portrait;margin:0;}
   header,.result-sidebar{display:none!important;}
   #page-result{display:flex!important;height:auto;}
   .result-preview{background:#fff;padding:0;}
@@ -305,7 +306,7 @@ textarea{resize:vertical;min-height:72px;}
           <span class="dot" style="background:#1a1a1a"></span>簡約專業
         </button>
         <button class="theme-pick" onclick="pickTheme('t-modern',this)">
-          <span class="dot" style="background:#80BC00"></span>現代 HKIC
+          <span class="dot" style="background:#80BC00"></span>現代深色
         </button>
         <button class="theme-pick" onclick="pickTheme('t-pro',this)">
           <span class="dot" style="background:#2e2e2e"></span>專業雙欄
@@ -318,10 +319,6 @@ textarea{resize:vertical;min-height:72px;}
       <button class="dl-btn" onclick="openQR()">
         <span class="ic">📱</span>
         <span><span style="display:block;font-weight:700">QR Code 下載</span><span class="dl-btn-sub">掃描即可喺手機下載</span></span>
-      </button>
-      <button class="dl-btn" onclick="openEmail()">
-        <span class="ic">✉️</span>
-        <span><span style="display:block;font-weight:700">電郵發送</span><span class="dl-btn-sub">輸入電郵，即時收到 CV</span></span>
       </button>
       <button class="dl-btn" onclick="window.print()">
         <span class="ic">🖨</span>
@@ -336,26 +333,14 @@ textarea{resize:vertical;min-height:72px;}
 <div class="modal-bg" id="qr-modal">
   <div class="modal">
     <button class="modal-close" onclick="closeModal('qr-modal')">✕</button>
-    <h3>📱 QR Code 下載</h3>
-    <p class="modal-sub">用手機掃描下方 QR Code，即可下載你的 CV</p>
+    <h3>📱 QR Code 下載 PDF</h3>
+    <p class="modal-sub">用手機掃描下方 QR Code，即可下載 PDF 版 CV</p>
     <div id="qr-box"></div>
     <div class="qr-url" id="qr-url-text"></div>
     <div class="modal-status" id="qr-status"></div>
   </div>
 </div>
 
-<!-- ══ MODAL: EMAIL ══ -->
-<div class="modal-bg" id="email-modal">
-  <div class="modal">
-    <button class="modal-close" onclick="closeModal('email-modal')">✕</button>
-    <h3>✉️ 電郵發送 CV</h3>
-    <p class="modal-sub">輸入電郵地址，我們將以連結形式發送你的 CV</p>
-    <label style="font-size:.72rem;font-weight:600;color:#636569;display:block;margin-bottom:5px;">電郵地址</label>
-    <input type="email" id="email-input" placeholder="your@email.com">
-    <button class="btn-solid" onclick="sendEmail()">發送 CV 連結</button>
-    <div class="modal-status" id="email-status"></div>
-  </div>
-</div>
 
 <script>
 var skills=[], items={edu:[],exp:[],ach:[]}, currentTheme='t-clean', sharedUrl=null;
@@ -509,7 +494,7 @@ function renderModern(cv,name,title,email,phone,loc,web,sum){
     loc?'<div class="sb-row"><span class="sb-ic">📍</span><span>'+esc(loc)+'</span></div>':'',
     web?'<div class="sb-row"><span class="sb-ic">🔗</span><span>'+esc(web)+'</span></div>':'',
   ].filter(Boolean).join('');
-  var skH=skills.map(function(s,i){var f=Math.min(5,Math.max(2,5-(i%3)));var d='';for(var j=0;j<5;j++)d+='<div class="sk-dot'+(j<f?' on':'')+'"></div>';return '<div class="sk-entry"><div class="sk-name">'+esc(s)+'</div><div class="sk-dots">'+d+'</div></div>';}).join('');
+  var skH=skills.length?'<div class="sk-tags">'+skills.map(function(s){return '<span class="sk-tag">'+esc(s)+'</span>';}).join('')+'</div>':'';
   var expH=items.exp.filter(function(e){return e.company||e.role;}).map(function(e){return '<div class="cv-item"><div class="cv-row"><span class="cv-ititle">'+esc(e.role)+'</span>'+(e.period?'<span class="badge">'+esc(e.period)+'</span>':'')+'</div>'+(e.company?'<div class="cv-org">'+esc(e.company)+'</div>':'')+(e.desc?'<div class="cv-desc">'+esc(e.desc)+'</div>':'')+'</div>';}).join('');
   var eduH=items.edu.filter(function(e){return e.school||e.degree;}).map(function(e){return '<div class="cv-item"><div class="cv-row"><span class="cv-ititle">'+esc(e.school)+'</span>'+(e.year?'<span class="badge">'+esc(e.year)+'</span>':'')+'</div>'+(e.degree?'<div class="cv-org">'+esc(e.degree)+'</div>':'')+(e.desc?'<div class="cv-desc">'+esc(e.desc)+'</div>':'')+'</div>';}).join('');
   var achH=items.ach.filter(function(a){return a.title;}).map(function(a){return '<div class="cv-item"><div class="cv-row"><span class="cv-ititle">'+esc(a.title)+'</span>'+(a.org?'<span class="badge">'+esc(a.org)+'</span>':'')+'</div>'+(a.desc?'<div class="cv-desc">'+esc(a.desc)+'</div>':'')+'</div>';}).join('');
@@ -537,17 +522,36 @@ function buildCVHTML(){
   return '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>CV</title><style>body{margin:0;padding:40px;background:#e0e0e0;display:flex;justify-content:center;}'+styles+'</style></head><body>'+cv.outerHTML+'</body></html>';
 }
 
+// ── PDF GENERATION ──
+async function generatePDFBlob(){
+  var el=document.getElementById('cv-out');
+  var canvas=await html2canvas(el,{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false});
+  var imgData=canvas.toDataURL('image/jpeg',0.95);
+  var pdf=new window.jspdf.jsPDF('p','mm','a4');
+  var pw=pdf.internal.pageSize.getWidth();
+  var ph=pdf.internal.pageSize.getHeight();
+  var ih=(canvas.height*pw)/canvas.width;
+  pdf.addImage(imgData,'JPEG',0,0,pw,ih);
+  var left=ih-ph;
+  while(left>0){
+    pdf.addPage();
+    pdf.addImage(imgData,'JPEG',0,-(ih-left),pw,ih);
+    left-=ph;
+  }
+  return pdf.output('blob');
+}
+
 async function uploadCV(){
   if(sharedUrl) return sharedUrl;
-  var cvHTML=buildCVHTML();
-  var blob=new Blob([cvHTML],{type:'text/html'});
+  var blob;
+  try{blob=await generatePDFBlob();}catch(e){console.warn('PDF gen failed:',e);return null;}
 
-  // Try 1: gofile.io (reliable CORS)
+  // Try 1: gofile.io
   try{
     var sr=await fetch('https://api.gofile.io/servers');
     var sd=await sr.json();
     var server=sd.data.servers[0].name;
-    var form=new FormData();form.append('file',blob,'cv.html');
+    var form=new FormData();form.append('file',blob,'cv.pdf');
     var ur=await fetch('https://'+server+'.gofile.io/contents/uploadfile',{method:'POST',body:form});
     var ud=await ur.json();
     if(ud.status==='ok'){sharedUrl=ud.data.downloadPage;return sharedUrl;}
@@ -558,7 +562,7 @@ async function uploadCV(){
     var form2=new FormData();
     form2.append('reqtype','fileupload');
     form2.append('time','24h');
-    form2.append('fileToUpload',blob,'cv.html');
+    form2.append('fileToUpload',blob,'cv.pdf');
     var r2=await fetch('https://litterbox.catbox.moe/resources/internals/api.php',{method:'POST',body:form2});
     var u2=await r2.text();
     if(u2.startsWith('https://')){sharedUrl=u2.trim();return sharedUrl;}
@@ -566,7 +570,7 @@ async function uploadCV(){
 
   // Try 3: oshi.at
   try{
-    var form3=new FormData();form3.append('f',blob,'cv.html');
+    var form3=new FormData();form3.append('f',blob,'cv.pdf');
     var r3=await fetch('https://oshi.at/',{method:'POST',body:form3});
     var t3=await r3.text();
     var m3=t3.match(/https:\/\/oshi\.at\/\S+/);
@@ -576,20 +580,24 @@ async function uploadCV(){
   return null;
 }
 
-// Local download fallback
-function downloadCVLocally(){
-  var html=buildCVHTML();
-  var blob=new Blob([html],{type:'text/html'});
-  var url=URL.createObjectURL(blob);
-  var a=document.createElement('a');a.href=url;a.download='my-cv.html';a.click();
-  setTimeout(function(){URL.revokeObjectURL(url);},3000);
+// Local PDF download fallback
+async function downloadCVLocally(){
+  try{
+    var blob=await generatePDFBlob();
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');a.href=url;a.download='my-cv.pdf';a.click();
+    setTimeout(function(){URL.revokeObjectURL(url);},3000);
+  }catch(e){
+    console.warn('PDF download failed, trying print:',e);
+    window.print();
+  }
 }
 
 // ── QR MODAL ──
 async function openQR(){
   document.getElementById('qr-modal').classList.add('open');
   var box=document.getElementById('qr-box');
-  box.innerHTML='<div style="text-align:center;padding:24px;color:#999"><span class="spinner-sm"></span> 上傳中，請稍候…</div>';
+  box.innerHTML='<div style="text-align:center;padding:24px;color:#999"><span class="spinner-sm"></span> 生成 PDF 並上傳中，請稍候…</div>';
   document.getElementById('qr-url-text').textContent='';
   document.getElementById('qr-status').innerHTML='';
   var url=await uploadCV();
@@ -608,28 +616,6 @@ async function openQR(){
   document.getElementById('qr-status').innerHTML='<span style="color:#80BC00">✅ 連結有效期 24 小時</span>';
 }
 
-// ── EMAIL MODAL ──
-async function openEmail(){
-  document.getElementById('email-modal').classList.add('open');
-  document.getElementById('email-input').value=g('f-email');
-  document.getElementById('email-status').textContent='';
-  document.getElementById('email-status').className='modal-status';
-}
-async function sendEmail(){
-  var email=document.getElementById('email-input').value.trim();
-  if(!email){document.getElementById('email-status').textContent='請輸入電郵地址';document.getElementById('email-status').className='modal-status err';return;}
-  var st=document.getElementById('email-status');
-  st.innerHTML='<span class="spinner-sm"></span>上傳中…';st.className='modal-status';
-  var url=await uploadCV();
-  if(!url){
-    st.innerHTML='<div style="color:#dc2626;margin-bottom:8px">⚠️ 無法上傳至雲端</div><button onclick="downloadCVLocally();closeModal(\'email-modal\')" style="background:#80BC00;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-weight:700;cursor:pointer;font-size:.82rem">⬇️ 儲存至本機後手動傳送</button>';
-    st.className='modal-status';return;}
-  var name=g('f-name')||'我';
-  var subject=encodeURIComponent(name+' 的 CV — 香港建造學院');
-  var body=encodeURIComponent('你好！\n\n請點擊以下連結下載 '+name+' 的 CV：\n\n'+url+'\n\n（連結有效期為 14 天）\n\n香港建造學院 CV Builder');
-  window.open('mailto:'+encodeURIComponent(email)+'?subject='+subject+'&body='+body);
-  st.textContent='✅ 已開啟電郵，請確認並發送';st.className='modal-status ok';
-}
 
 function closeModal(id){document.getElementById(id).classList.remove('open');}
 document.querySelectorAll('.modal-bg').forEach(function(m){m.addEventListener('click',function(e){if(e.target===m)m.classList.remove('open');});});
